@@ -27,7 +27,6 @@ function App() {
 
     const [items, setItems] = useState(INITIAL_DATA);
 
-    console.log(items);
     const sortItems = (a, b) => {
         if (a.date < b.date) {
             return 1;
@@ -56,24 +55,7 @@ function App() {
             <LeftPanel>
                 <Header />
                 <JournalAddButton />
-                <JournalList>
-                    {items.length === 0 ? (
-                        <p>Еще нет записей, добавьте первую</p>
-                    ) : (
-                        items.sort(sortItems).map((item) => {
-                            return (
-                                <CardButton key={item.id}>
-                                    {/* key используем для того, чтобы не перерендеривался весь список */}
-                                    <JournalItem
-                                        title={item.title}
-                                        text={item.text}
-                                        date={item.date}
-                                    />
-                                </CardButton>
-                            );
-                        })
-                    )}
-                </JournalList>
+                <JournalList items={items} />
             </LeftPanel>
             <Body>
                 <JournalForm onSubmit={addItem} />
