@@ -1,14 +1,28 @@
 import styles from './JournalForm.module.css';
 import Button from '../Button/Button';
 import cn from 'classnames';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+const INITIAL_STATE = {
+    title: true,
+    text: true,
+    date: true,
+};
 
 function JournalForm({ onSubmit }) {
-    const [formValidState, setFormValidState] = useState({
-        title: true,
-        text: true,
-        date: true,
-    });
+    const [formValidState, setFormValidState] = useState(INITIAL_STATE);
+
+    useEffect(() => {
+        // если форма невалидна - красим в красный на 2 сек (но нужно очистить useEffect тк при спаме кнопки "СОздать" при невалидной форме создастся много таймеров)
+        let timerId; // запоминаем id таймера для того чтобы удалить таймер вдальнейшем
+        if (Object.values(formValidState).includes(false)) {
+            timerId = setTimeout(() => setFormValidState(INITIAL_STATE), 2000);
+        }
+        // очищаем эффект после очередного рендера или после исчезнования компонента
+        return () => {
+            clearTimeout(timerId); // эта функция будет вызвана перед выполнением следующего эффекта (из-за этого форма не будет моргать красным)
+        };
+    }, [formValidState]);
 
     const addJournalItem = (e) => {
         e.preventDefault();

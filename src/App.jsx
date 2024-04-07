@@ -29,6 +29,7 @@ function App() {
     const [items, setItems] = useState([]);
 
     useEffect(() => {
+        // запустится единожды при первом рендере
         const data = JSON.parse(localStorage.getItem('data'));
         if (data) {
             setItems(
