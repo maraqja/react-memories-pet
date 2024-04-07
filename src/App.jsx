@@ -10,20 +10,46 @@ import LeftPanel from './layouts/LeftPanel/LeftPanel';
 import JournalForm from './components/JournalForm/JournalForm';
 
 function App() {
-    const data = [
-        {
-            title: 'Подготовка к обновлению курсов',
-            text: 'Горные походы открывают удивительные природные ландшафт',
-            date: new Date(),
-        },
-        {
-            title: 'Поход в годы',
-            text: 'Думал, что очень много времени',
-            date: new Date(),
-        },
+    const INITIAL_DATA = [
+        // {
+        //     id: 1,
+        //     title: 'Подготовка к обновлению курсов',
+        //     text: 'Горные походы открывают удивительные природные ландшафт',
+        //     date: new Date(),
+        // },
+        // {
+        //     id: 2,
+        //     title: 'Поход в годы',
+        //     text: 'Думал, что очень много времени',
+        //     date: new Date(),
+        // },
     ];
 
-    // const [inputData, setInputData] = useState('');
+    const [items, setItems] = useState(INITIAL_DATA);
+
+    console.log(items);
+    const sortItems = (a, b) => {
+        if (a.date < b.date) {
+            return 1;
+        } else {
+            return -1;
+        }
+    };
+
+    const addItem = (item) => {
+        setItems((oldItems) => [
+            {
+                id: oldItems.length
+                    ? Math.max(...oldItems.map((item) => item.id)) + 1
+                    : 0,
+                title: item.title,
+                text: item.text,
+                date: item.date !== '' ? new Date(item.date) : new Date(),
+            },
+            ...oldItems,
+        ]);
+        // setItems([item, ...items]);
+    };
 
     return (
         <div className="app">
@@ -31,24 +57,26 @@ function App() {
                 <Header />
                 <JournalAddButton />
                 <JournalList>
-                    <CardButton>
-                        <JournalItem
-                            title={data[0].title}
-                            text={data[0].text}
-                            date={data[0].date}
-                        />
-                    </CardButton>
-                    <CardButton>
-                        <JournalItem
-                            title={data[1].title}
-                            text={data[1].text}
-                            date={data[1].date}
-                        />
-                    </CardButton>
+                    {items.length === 0 ? (
+                        <p>Еще нет записей, добавьте первую</p>
+                    ) : (
+                        items.sort(sortItems).map((item) => {
+                            return (
+                                <CardButton key={item.id}>
+                                    {/* key используем для того, чтобы не перерендеривался весь список */}
+                                    <JournalItem
+                                        title={item.title}
+                                        text={item.text}
+                                        date={item.date}
+                                    />
+                                </CardButton>
+                            );
+                        })
+                    )}
                 </JournalList>
             </LeftPanel>
             <Body>
-                <JournalForm />
+                <JournalForm onSubmit={addItem} />
             </Body>
         </div>
     );
