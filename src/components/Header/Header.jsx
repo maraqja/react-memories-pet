@@ -1,3 +1,4 @@
+import SelectUser from '../SelectUser/SelectUser';
 import styles from './Header.module.css';
 
 function Header() {
@@ -8,6 +9,7 @@ function Header() {
                 src="/logo.svg"
                 alt="Логотип журнала"
             />
+            <SelectUser />
         </>
     );
 }

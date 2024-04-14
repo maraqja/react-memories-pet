@@ -40,6 +40,8 @@ function App() {
 
     const [items, setItems] = useLocalStorage('data');
 
+    const [userId, setUserId] = useState(1);
+
     const addItem = (item) => {
         setItems([
             ...mapItems(items),
@@ -55,18 +57,22 @@ function App() {
     };
 
     return (
-        <UserContext.Provider value={{ userId: 1 }}>
-            <div className="app">
-                <LeftPanel>
-                    <Header />
-                    <JournalAddButton />
-                    <JournalList items={mapItems(items)} />
-                </LeftPanel>
-                <Body>
-                    <JournalForm onSubmit={addItem} />
-                </Body>
-            </div>
-        </UserContext.Provider>
+        <>
+            <UserContext.Provider value={{ userId, setUserId }}>
+                {/* хотим отображать только записи определенного юзера  - какого конкретно - выбираем в Header в SelectUser компоненте*/}
+                <div className="app">
+                    <LeftPanel>
+                        <Header />
+                        <JournalAddButton />
+                        <JournalList items={mapItems(items)} />
+                    </LeftPanel>
+                    <Body>
+                        <JournalForm onSubmit={addItem} />
+                    </Body>
+                </div>
+            </UserContext.Provider>
+            <JournalForm onSubmit={addItem} />
+        </>
     );
 }
 
