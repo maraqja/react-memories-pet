@@ -8,6 +8,17 @@ import JournalList from './components/JournalList/JournalList';
 import Body from './layouts/Body/Body';
 import LeftPanel from './layouts/LeftPanel/LeftPanel';
 import JournalForm from './components/JournalForm/JournalForm';
+import { useLocalStorage } from './hooks/use-localstorage.hook';
+
+function mapItems(items) {
+    if (!items) {
+        return [];
+    }
+    return items.map((i) => ({
+        ...i,
+        date: new Date(i.date),
+    }));
+}
 
 function App() {
     // const INITIAL_DATA = [
@@ -26,48 +37,20 @@ function App() {
     // ];
     // localStorage.setItem('data', JSON.stringify(INITIAL_DATA));
 
-    const [items, setItems] = useState([]);
-
-    useEffect(() => {
-        // запустится единожды при первом рендере
-        const data = JSON.parse(localStorage.getItem('data'));
-        if (data) {
-            setItems(
-                data.map((item) => {
-                    return { ...item, date: new Date(item.date) };
-                })
-            );
-        }
-    }, []);
-
-    useEffect(() => {
-        console.log(items);
-        if (items.length) {
-            localStorage.setItem('data', JSON.stringify(items));
-        }
-    }, [items]);
-
-    const sortItems = (a, b) => {
-        if (a.date < b.date) {
-            return 1;
-        } else {
-            return -1;
-        }
-    };
+    const [items, setItems] = useLocalStorage('data');
 
     const addItem = (item) => {
-        setItems((oldItems) => [
+        setItems([
+            ...mapItems(items),
             {
-                id: oldItems.length
-                    ? Math.max(...oldItems.map((item) => item.id)) + 1
+                id: items.length
+                    ? Math.max(...items.map((item) => item.id)) + 1
                     : 0,
                 title: item.title,
                 text: item.text,
                 date: item.date !== '' ? new Date(item.date) : new Date(),
             },
-            ...oldItems,
         ]);
-        // setItems([item, ...items]);
     };
 
     return (
@@ -75,7 +58,7 @@ function App() {
             <LeftPanel>
                 <Header />
                 <JournalAddButton />
-                <JournalList items={items} />
+                <JournalList items={mapItems(items)} />
             </LeftPanel>
             <Body>
                 <JournalForm onSubmit={addItem} />
