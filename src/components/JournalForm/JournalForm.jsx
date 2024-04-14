@@ -1,73 +1,49 @@
 import styles from './JournalForm.module.css';
 import Button from '../Button/Button';
 import cn from 'classnames';
-import { useEffect, useState } from 'react';
-
-const INITIAL_STATE = {
-    title: true,
-    text: true,
-    date: true,
-};
+import { useEffect, useReducer, useState } from 'react';
+import { INITIAL_STATE, formReducer } from './JournalForm.state';
 
 function JournalForm({ onSubmit }) {
-    const [formValidState, setFormValidState] = useState(INITIAL_STATE);
+    const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
+    const { values, isValid, isFormReadyToSubmit } = formState; // деструктурируем стейт, чтобы подписаться в useEffect только на изменения определенных свойств (чтобы не было единого useEffect-а на при изменение formState с кучей условий)
 
     useEffect(() => {
         // если форма невалидна - красим в красный на 2 сек (но нужно очистить useEffect тк при спаме кнопки "СОздать" при невалидной форме создастся много таймеров)
         let timerId; // запоминаем id таймера для того чтобы удалить таймер вдальнейшем
-        if (Object.values(formValidState).includes(false)) {
-            timerId = setTimeout(() => setFormValidState(INITIAL_STATE), 2000);
+        if (Object.values(isValid).includes(false)) {
+            timerId = setTimeout(
+                () => dispatchForm({ type: 'RESET_VALIDITY' }),
+                2000
+            );
         }
         // очищаем эффект после очередного рендера или после исчезнования компонента
         return () => {
             clearTimeout(timerId); // эта функция будет вызвана перед выполнением следующего эффекта (из-за этого форма не будет моргать красным)
         };
-    }, [formValidState]);
+    }, [isValid]); // подписываемся на изменение определенного свойства состояния формы
+
+    useEffect(() => {
+        if (isFormReadyToSubmit) {
+            onSubmit(values);
+            dispatchForm({ type: 'CLEAR' });
+        }
+    }, [isFormReadyToSubmit]);
 
     const addJournalItem = (e) => {
         e.preventDefault();
 
         const formData = new FormData(e.target);
         const formProps = Object.fromEntries(formData);
-        console.log(formProps);
-        // let isFormValid = true;
-        // if (!formProps.title.trim().length) {S
-        //     setFormValidState((state) => {
-        //         return { ...state, title: false };
-        //     });
-        //     isFormValid = false;
-        // } else {
-        //     setFormValidState((state) => {
-        //         return { ...state, title: true };
-        //     });
-        // }
-        // if (!formProps.text.trim().length) {
-        //     setFormValidState((state) => {
-        //         return { ...state, text: false };
-        //     });
-        //     isFormValid = false;
-        // }
-        // if (!formProps.date) {
-        //     setFormValidState((state) => {
-        //         return { ...state, date: false };
-        //     });
-        //     isFormValid = false;
-        // }
 
-        // if (!isFormValid) {
-        //     return;
-        // }
-        const newState = {
-            title: !formProps.title.trim() ? false : true,
-            text: !formProps.text.trim() ? false : true,
-            date: !formProps.date ? false : true,
-        };
-        setFormValidState(newState);
-        if (Object.values(newState).includes(false)) {
-            return;
-        }
+        dispatchForm({ type: 'SUBMIT' }); // тут свойство isFormReadyToSubmit будет установлено в true если все ОК - тогда обработаем с useEffect это
+    };
 
-        onSubmit(formProps);
+    const onChange = (e) => {
+        dispatchForm({
+            type: 'SET_VALUE',
+            payload: { [e.target.name]: e.target.value },
+        });
     };
 
     return (
@@ -75,9 +51,11 @@ function JournalForm({ onSubmit }) {
             <div>
                 <input
                     type="text"
+                    onChange={onChange}
                     name="title"
+                    value={values.title}
                     className={cn(styles['input-title'], {
-                        [styles['invalid']]: !formValidState.title,
+                        [styles['invalid']]: !isValid.title,
                     })}
                 />
             </div>
@@ -88,10 +66,12 @@ function JournalForm({ onSubmit }) {
                 </label>
                 <input
                     type="date"
+                    onChange={onChange}
                     name="date"
+                    value={values.date}
                     id="date"
                     className={cn(styles['input'], {
-                        [styles['invalid']]: !formValidState.date,
+                        [styles['invalid']]: !isValid.date,
                     })}
                 />
             </div>
@@ -102,6 +82,8 @@ function JournalForm({ onSubmit }) {
                 </label>
                 <input
                     type="text"
+                    onChange={onChange}
+                    value={values.tag}
                     id="tag"
                     name="tag"
                     className={styles['input']}
@@ -110,11 +92,13 @@ function JournalForm({ onSubmit }) {
 
             <textarea
                 name="text"
+                onChange={onChange}
+                value={values.text}
                 id=""
                 cols="30"
                 rows="10"
                 className={cn(styles['input'], {
-                    [styles['invalid']]: !formValidState.text,
+                    [styles['invalid']]: !isValid.text,
                 })}
             ></textarea>
             <Button text="Сохранить" />
