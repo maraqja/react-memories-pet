@@ -3,6 +3,7 @@ import Button from '../Button/Button';
 import cn from 'classnames';
 import { useEffect, useReducer, useRef } from 'react';
 import { INITIAL_STATE, formReducer } from './JournalForm.state';
+import Input from '../Input/Input';
 
 function JournalForm({ onSubmit }) {
     const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
@@ -69,15 +70,14 @@ function JournalForm({ onSubmit }) {
     return (
         <form className={styles['journal-form']} onSubmit={addJournalItem}>
             <div>
-                <input
+                <Input
                     type="text"
                     onChange={onChange}
+                    isValid={isValid.title}
                     name="title"
                     ref={titleRef}
                     value={values.title}
-                    className={cn(styles['input-title'], {
-                        [styles['invalid']]: !isValid.title,
-                    })}
+                    appearence="title"
                 />
             </div>
             <div className={styles['form-row']}>
@@ -85,16 +85,14 @@ function JournalForm({ onSubmit }) {
                     <img src="/calendar.svg" alt="Иконка календаря" />
                     <span>Дата</span>
                 </label>
-                <input
+                <Input
                     type="date"
                     onChange={onChange}
+                    isValid={isValid.date}
                     name="date"
                     ref={dateRef}
                     value={values.date}
                     id="date"
-                    className={cn(styles['input'], {
-                        [styles['invalid']]: !isValid.date,
-                    })}
                 />
             </div>
             <div className={styles['form-row']}>
@@ -102,13 +100,12 @@ function JournalForm({ onSubmit }) {
                     <img src="/folder.svg" alt="Иконка папки" />
                     <span>Метки</span>
                 </label>
-                <input
+                <Input
                     type="text"
                     onChange={onChange}
                     value={values.tag}
                     id="tag"
                     name="tag"
-                    className={styles['input']}
                 />
             </div>
 
