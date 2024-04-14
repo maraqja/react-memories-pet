@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import CardButton from './components/CardButton/CardButton';
 import Header from './components/Header/Header';
 import JournalAddButton from './components/JournalAddButton/JournalAddButton';
-import JournalItem from './components/JournalItem/JournalItem';
 import JournalList from './components/JournalList/JournalList';
 import Body from './layouts/Body/Body';
 import LeftPanel from './layouts/LeftPanel/LeftPanel';
 import JournalForm from './components/JournalForm/JournalForm';
 import { useLocalStorage } from './hooks/use-localstorage.hook';
-import { UserContext } from './context/user.context';
+import { UserContextProvider } from './context/user.context';
 
 function mapItems(items) {
     if (!items) {
@@ -40,8 +38,6 @@ function App() {
 
     const [items, setItems] = useLocalStorage('data');
 
-    const [userId, setUserId] = useState(1);
-
     const addItem = (item) => {
         setItems([
             ...mapItems(items),
@@ -49,8 +45,7 @@ function App() {
                 id: items.length
                     ? Math.max(...items.map((item) => item.id)) + 1
                     : 0,
-                title: item.title,
-                text: item.text,
+                ...item,
                 date: item.date !== '' ? new Date(item.date) : new Date(),
             },
         ]);
@@ -58,7 +53,7 @@ function App() {
 
     return (
         <>
-            <UserContext.Provider value={{ userId, setUserId }}>
+            <UserContextProvider>
                 {/* хотим отображать только записи определенного юзера  - какого конкретно - выбираем в Header в SelectUser компоненте*/}
                 <div className="app">
                     <LeftPanel>
@@ -70,8 +65,7 @@ function App() {
                         <JournalForm onSubmit={addItem} />
                     </Body>
                 </div>
-            </UserContext.Provider>
-            <JournalForm onSubmit={addItem} />
+            </UserContextProvider>
         </>
     );
 }
