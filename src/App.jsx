@@ -37,18 +37,32 @@ function App() {
     // localStorage.setItem('data', JSON.stringify(INITIAL_DATA));
 
     const [items, setItems] = useLocalStorage('data');
+    const [selectedItem, setSelectedItem] = useState({});
 
     const addItem = (item) => {
-        setItems([
-            ...mapItems(items),
-            {
-                id: items.length
-                    ? Math.max(...items.map((item) => item.id)) + 1
-                    : 0,
-                ...item,
-                date: item.date !== '' ? new Date(item.date) : new Date(),
-            },
-        ]);
+        if (!item.id) {
+            setItems([
+                ...mapItems(items),
+                {
+                    id: items.length
+                        ? Math.max(...items.map((item) => item.id)) + 1
+                        : 0,
+                    ...item,
+                    date: item.date !== '' ? new Date(item.date) : new Date(),
+                },
+            ]);
+        } else {
+            // случай для обновления
+            setItems([
+                ...mapItems(items).map((i) => {
+                    if (i.id === item.id) {
+                        // тут как раз обновляем
+                        return item;
+                    }
+                    return i;
+                }),
+            ]);
+        }
     };
 
     return (
@@ -59,10 +73,13 @@ function App() {
                     <LeftPanel>
                         <Header />
                         <JournalAddButton />
-                        <JournalList items={mapItems(items)} />
+                        <JournalList
+                            items={mapItems(items)}
+                            setItem={setSelectedItem}
+                        />
                     </LeftPanel>
                     <Body>
-                        <JournalForm onSubmit={addItem} />
+                        <JournalForm onSubmit={addItem} data={selectedItem} />
                     </Body>
                 </div>
             </UserContextProvider>
