@@ -35,6 +35,7 @@ function App() {
     //     },
     // ];
     // localStorage.setItem('data', JSON.stringify(INITIAL_DATA));
+    console.log('App');
 
     const [items, setItems] = useLocalStorage('data');
 

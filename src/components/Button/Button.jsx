@@ -1,13 +1,11 @@
 import './Button.css';
 import { useState } from 'react';
 
-function Button({ text, onClick }) {
-    const [buttonText, setText] = useState(text);
-
+function Button({ children, onClick }) {
     return (
         <>
             <button onClick={onClick} className="button accent">
-                {buttonText}
+                {children}
             </button>
         </>
     );
