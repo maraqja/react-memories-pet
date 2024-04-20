@@ -116,7 +116,6 @@ function JournalForm({ onSubmit }) {
                     name="tag"
                 />
             </div>
-
             <textarea
                 name="text"
                 onChange={onChange}
@@ -129,7 +128,7 @@ function JournalForm({ onSubmit }) {
                     [styles['invalid']]: !isValid.text,
                 })}
             ></textarea>
-            <Button text="Сохранить" />
+            <Button>Сохранить</Button>
         </form>
     );
 }
