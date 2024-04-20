@@ -6,7 +6,7 @@ import { INITIAL_STATE, formReducer } from './JournalForm.state';
 import Input from '../Input/Input';
 import { UserContext } from '../../context/user.context';
 
-function JournalForm({ onSubmit, data }) {
+function JournalForm({ onSubmit, data, onDelete }) {
     const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
     const { values, isValid, isFormReadyToSubmit } = formState; // деструктурируем стейт, чтобы подписаться в useEffect только на изменения определенных свойств (чтобы не было единого useEffect-а на при изменение formState с кучей условий)
 
@@ -35,6 +35,10 @@ function JournalForm({ onSubmit, data }) {
     };
 
     useEffect(() => {
+        if (!data) {
+            dispatchForm({ type: 'CLEAR' });
+            dispatchForm({ type: 'SET_VALUE', payload: { userId } }); // чтобы не потерять userId после очистки формы
+        }
         dispatchForm({ type: 'SET_VALUE', payload: { ...data } });
     }, [data]);
 
@@ -72,6 +76,12 @@ function JournalForm({ onSubmit, data }) {
         dispatchForm({ type: 'SUBMIT' }); // тут свойство isFormReadyToSubmit будет установлено в true если все ОК - тогда обработаем с useEffect это
     };
 
+    const deleteJournalItem = () => {
+        onDelete(data.id);
+        dispatchForm({ type: 'CLEAR' });
+        dispatchForm({ type: 'SET_VALUE', payload: { userId } }); // чтобы не потерять userId после очистки формы
+    };
+
     const onChange = (e) => {
         dispatchForm({
             type: 'SET_VALUE',
@@ -82,7 +92,7 @@ function JournalForm({ onSubmit, data }) {
     return (
         <form className={styles['journal-form']} onSubmit={addJournalItem}>
             {userId}
-            <div>
+            <div className={styles['form-row']}>
                 <Input
                     type="text"
                     onChange={onChange}
@@ -92,6 +102,17 @@ function JournalForm({ onSubmit, data }) {
                     value={values.title}
                     appearence="title"
                 />
+                {data?.id ? (
+                    <button
+                        className={styles['delete']}
+                        type="button"
+                        onClick={deleteJournalItem}
+                    >
+                        <img src="/archive.svg" alt="Кнопка удалить" />
+                    </button>
+                ) : (
+                    ''
+                )}
             </div>
             <div className={styles['form-row']}>
                 <label htmlFor="date" className={styles['form-label']}>
